@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a1da353243062479a9b31c85074a796b
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/Standard Assets/Environment/Water/Water/Scripts/WaterBase.cs
+  uploadId: 909700

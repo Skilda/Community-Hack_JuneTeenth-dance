@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 81899cddfbc72494497a6db0ae045f2c
+timeCreated: 1465903628
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Resources/Shaders/EyeAdaptation.shader
+  uploadId: 909700

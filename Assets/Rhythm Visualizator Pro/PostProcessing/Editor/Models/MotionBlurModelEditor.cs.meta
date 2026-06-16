@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 870806eda355b5144879155e2ba37eb6
+timeCreated: 1468325681
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Editor/Models/MotionBlurModelEditor.cs
+  uploadId: 909700

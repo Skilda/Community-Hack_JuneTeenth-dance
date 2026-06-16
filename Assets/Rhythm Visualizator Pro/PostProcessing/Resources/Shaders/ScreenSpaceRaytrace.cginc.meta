@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a92d6fdbe2c35f94190497c18b88f9af
+timeCreated: 1464350148
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Resources/Shaders/ScreenSpaceRaytrace.cginc
+  uploadId: 909700

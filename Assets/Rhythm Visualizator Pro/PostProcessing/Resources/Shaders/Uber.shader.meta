@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 8ce0a6f4c8cae334d8a5617f302b6769
+timeCreated: 1459956426
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Resources/Shaders/Uber.shader
+  uploadId: 909700

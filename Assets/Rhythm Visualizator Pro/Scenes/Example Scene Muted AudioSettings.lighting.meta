@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c8b3bb33def598e438340500274804b5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/Scenes/Example Scene Muted AudioSettings.lighting
+  uploadId: 909700

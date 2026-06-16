@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 944463113244f4bf8b05c1757cd838a4
+timeCreated: 1487340121
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Utilities/CustomMotionTexture/Materials/UVChecker.mat
+  uploadId: 909700

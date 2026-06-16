@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: c62b7d87755b447919138e67f8e22e0c
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/Standard Assets/Environment/Water/Water/Scripts/Displace.cs
+  uploadId: 909700

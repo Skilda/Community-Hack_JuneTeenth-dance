@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: faeb738b5a2c3ff43bd104dd5b1a275c
+timeCreated: 1476954194
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Resources/Shaders/DiskKernels.cginc
+  uploadId: 909700

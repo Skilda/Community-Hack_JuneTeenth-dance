@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 69ec103ad248d0544a01939e1449b2ba
+timeCreated: 1464415619
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/Music Player/Animations/SongSelectionAnimation.anim
+  uploadId: 909700

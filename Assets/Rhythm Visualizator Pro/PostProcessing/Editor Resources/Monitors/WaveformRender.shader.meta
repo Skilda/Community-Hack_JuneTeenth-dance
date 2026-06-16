@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 8b3e43c50424ab2428a9c172843bc66d
+timeCreated: 1459956391
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Editor Resources/Monitors/WaveformRender.shader
+  uploadId: 909700

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a9b14c3f1ed5734468b289dedddfe852
+timeCreated: 1474438847
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/Music Player/SearchSongPrefab.prefab
+  uploadId: 909700

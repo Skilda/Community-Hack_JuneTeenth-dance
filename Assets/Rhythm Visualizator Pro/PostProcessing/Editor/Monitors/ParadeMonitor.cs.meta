@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: b1f878f3742072e40a280683573bd0ee
+timeCreated: 1460031643
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Editor/Monitors/ParadeMonitor.cs
+  uploadId: 909700

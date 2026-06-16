@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 087f71beb25007f408f89b964fb59cd6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88041
+  packageName: Rhythm Visualizator Pro
+  packageVersion: 2.2b
+  assetPath: Assets/Rhythm Visualizator Pro/PostProcessing/Utilities/CustomMotionTexture/ExampleSceneSettings.lighting
+  uploadId: 909700
