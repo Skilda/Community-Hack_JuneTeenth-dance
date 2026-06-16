@@ -209,6 +209,10 @@ public class RhythmVisualizatorPro : MonoBehaviour {
 
     float rhythmAverage;
 
+    // Read-only live bass/beat energy (lowest 40 FFT bins * rhythmSensibility).
+    // A beat is when this crosses minRhythmSensibility (1.5). Used by DrumHitInteraction.
+    public float RhythmAverage => rhythmAverage;
+
     Visualizations lastVisualizationForm = Visualizations.Line;
 
     #endregion
