@@ -24,6 +24,9 @@ namespace UnityStandardAssets.Water
 
         private Dictionary<Camera, Camera> m_ReflectionCameras = new Dictionary<Camera, Camera>();
         private Dictionary<Camera, Camera> m_RefractionCameras = new Dictionary<Camera, Camera>();
+        // VR multi-pass: tracks the last frame each camera fired this callback, so we can tell
+        // the left-eye pass (first this frame) from the right (second). See OnBeginCameraRendering.
+        private Dictionary<Camera, int> m_LastEyeFrame = new Dictionary<Camera, int>();
         private RenderTexture m_ReflectionTexture;
         private RenderTexture m_RefractionTexture;
         private WaterMode m_HardwareWaterSupport = WaterMode.Refractive;
@@ -52,6 +55,7 @@ namespace UnityStandardAssets.Water
             foreach (var kvp in m_RefractionCameras)
                 DestroyImmediate((kvp.Value).gameObject);
             m_RefractionCameras.Clear();
+            m_LastEyeFrame.Clear();
         }
 
         private void OnBeginCameraRendering(ScriptableRenderContext context, Camera cam)
@@ -79,6 +83,31 @@ namespace UnityStandardAssets.Water
             UpdateCameraModes(cam, reflectionCamera);
             UpdateCameraModes(cam, refractionCamera);
 
+            // --- VR per-eye matrices -------------------------------------------------------
+            // In multi-pass VR this callback fires once per eye (URP wraps BeginCameraRendering
+            // inside the per-XRPass loop). But URP does NOT push the per-eye matrices through the
+            // mono Camera API: cam.worldToCameraMatrix / projectionMatrix / transform stay at the
+            // center eye. So grab the active eye's matrices explicitly. URP refreshes the current
+            // pass's stereo matrix *before* this callback but doesn't expose which eye it is here,
+            // so we infer it from call order: first invocation per frame = left (multipassId 0),
+            // second = right.
+            Matrix4x4 camView = cam.worldToCameraMatrix;
+            Matrix4x4 camProj = cam.projectionMatrix;
+            if (cam.stereoEnabled)
+            {
+                int frame = Time.frameCount;
+                int last;
+                bool firstThisFrame = !m_LastEyeFrame.TryGetValue(cam, out last) || last != frame;
+                m_LastEyeFrame[cam] = frame;
+                Camera.StereoscopicEye eye = firstThisFrame ? Camera.StereoscopicEye.Left : Camera.StereoscopicEye.Right;
+                camView = cam.GetStereoViewMatrix(eye);
+                camProj = cam.GetStereoProjectionMatrix(eye);
+            }
+            // World-space eye position from the inverse view matrix; eyes share HMD orientation.
+            Vector3 camPos = camView.inverse.GetColumn(3);
+            Quaternion camRot = cam.transform.rotation;
+            // -------------------------------------------------------------------------------
+
             if (mode >= WaterMode.Reflective)
             {
                 float d = -Vector3.Dot(normal, pos) - clipPlaneOffset;
@@ -86,21 +115,22 @@ namespace UnityStandardAssets.Water
 
                 Matrix4x4 reflection = Matrix4x4.zero;
                 CalculateReflectionMatrix(ref reflection, reflectionPlane);
-                Vector3 oldpos = cam.transform.position;
+                Vector3 oldpos = camPos;
                 Vector3 newpos = reflection.MultiplyPoint(oldpos);
-                reflectionCamera.worldToCameraMatrix = cam.worldToCameraMatrix * reflection;
+                reflectionCamera.worldToCameraMatrix = camView * reflection;
 
+                reflectionCamera.projectionMatrix = camProj;
                 Vector4 clipPlane = CameraSpacePlane(reflectionCamera, pos, normal, 1.0f);
-                reflectionCamera.projectionMatrix = cam.CalculateObliqueMatrix(clipPlane);
+                reflectionCamera.projectionMatrix = reflectionCamera.CalculateObliqueMatrix(clipPlane);
 
-                reflectionCamera.cullingMatrix = cam.projectionMatrix * cam.worldToCameraMatrix;
+                reflectionCamera.cullingMatrix = camProj * camView;
                 reflectionCamera.cullingMask = ~(1 << 4) & reflectLayers.value;
                 reflectionCamera.targetTexture = m_ReflectionTexture;
 
                 bool oldCulling = GL.invertCulling;
                 GL.invertCulling = !oldCulling;
                 reflectionCamera.transform.position = newpos;
-                Vector3 euler = cam.transform.eulerAngles;
+                Vector3 euler = camRot.eulerAngles;
                 reflectionCamera.transform.eulerAngles = new Vector3(-euler.x, euler.y, euler.z);
 
                 UniversalRenderPipeline.RenderSingleCamera(context, reflectionCamera);
@@ -112,16 +142,17 @@ namespace UnityStandardAssets.Water
 
             if (mode >= WaterMode.Refractive)
             {
-                refractionCamera.worldToCameraMatrix = cam.worldToCameraMatrix;
+                refractionCamera.worldToCameraMatrix = camView;
 
+                refractionCamera.projectionMatrix = camProj;
                 Vector4 clipPlane = CameraSpacePlane(refractionCamera, pos, normal, -1.0f);
-                refractionCamera.projectionMatrix = cam.CalculateObliqueMatrix(clipPlane);
+                refractionCamera.projectionMatrix = refractionCamera.CalculateObliqueMatrix(clipPlane);
 
-                refractionCamera.cullingMatrix = cam.projectionMatrix * cam.worldToCameraMatrix;
+                refractionCamera.cullingMatrix = camProj * camView;
                 refractionCamera.cullingMask = ~(1 << 4) & refractLayers.value;
                 refractionCamera.targetTexture = m_RefractionTexture;
-                refractionCamera.transform.position = cam.transform.position;
-                refractionCamera.transform.rotation = cam.transform.rotation;
+                refractionCamera.transform.position = camPos;
+                refractionCamera.transform.rotation = camRot;
 
                 UniversalRenderPipeline.RenderSingleCamera(context, refractionCamera);
 
