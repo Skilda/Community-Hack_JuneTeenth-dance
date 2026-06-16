@@ -30,6 +30,11 @@ public class RhythmVisualizatorPro : MonoBehaviour {
 
     List<GameObject> soundBars = new List<GameObject>();
 
+    // Cached per-bar references to avoid repeated GetComponent calls every frame (perf).
+    List<SoundBar> soundBarComponents = new List<SoundBar>();
+    List<ParticleSystem> soundBarChildParticles = new List<ParticleSystem>();
+    List<Transform> soundBarTransforms = new List<Transform>();
+
     int usedSoundBars = 100;
 
     public enum ScaleFrom
@@ -264,6 +269,9 @@ public class RhythmVisualizatorPro : MonoBehaviour {
         }
 
         soundBars.Clear ();
+        soundBarComponents.Clear ();
+        soundBarChildParticles.Clear ();
+        soundBarTransforms.Clear ();
 
         Application.targetFrameRate = 144;
 
@@ -320,7 +328,12 @@ public class RhythmVisualizatorPro : MonoBehaviour {
             
             var clone = Instantiate (soundBarToInstantiate, transform.position, Quaternion.identity) as GameObject;
             clone.transform.SetParent (soundBarsTransform.transform);
-            clone.GetComponent<SoundBar> ().cube.transform.localScale = new Vector3 (soundBarsWidth, 1, soundBarsDepth);
+
+            // Cache references once; reused every frame in LateUpdate to avoid GetComponent overhead.
+            var sb = clone.GetComponent<SoundBar> ();
+            var childPS = clone.GetComponentInChildren<ParticleSystem> ();
+
+            sb.cube.transform.localScale = new Vector3 (soundBarsWidth, 1, soundBarsDepth);
 
             clone.name = string.Format ("SoundBar {0}", i + 1);
 
@@ -345,23 +358,26 @@ public class RhythmVisualizatorPro : MonoBehaviour {
                 rend.material.SetColor("_EmissionColor", newColor);
             }
 
-            var actualParticleSystem = clone.GetComponentInChildren<ParticleSystem> ().main;
+            var actualParticleSystem = childPS.main;
             actualParticleSystem.startColor = newColor;
 
             // UPDATE: Cambiado a _BaseColor y añadido _EmissionColor
-            var rayMat = clone.GetComponent<SoundBar> ().ray.material;
+            var rayMat = sb.ray.material;
             rayMat.EnableKeyword("_EMISSION");
             rayMat.SetColor ("_BaseColor", newColor2);
             rayMat.SetColor ("_EmissionColor", newColor2);
 
             if (scaleFrom == ScaleFrom.Downside) {
-                clone.GetComponent<SoundBar> ().ray.transform.localScale = new Vector3 (Mathf.Clamp (newWidth, 1, Mathf.Infinity), 1, raysLength);
-                clone.GetComponent<SoundBar> ().ray.transform.localPosition = new Vector3 (0, newRayScale, 0);
+                sb.ray.transform.localScale = new Vector3 (Mathf.Clamp (newWidth, 1, Mathf.Infinity), 1, raysLength);
+                sb.ray.transform.localPosition = new Vector3 (0, newRayScale, 0);
             } else {
-                clone.GetComponent<SoundBar> ().ray.transform.localScale = new Vector3 (Mathf.Clamp (newWidth, 0.5f, Mathf.Infinity), 1, raysLength);
+                sb.ray.transform.localScale = new Vector3 (Mathf.Clamp (newWidth, 0.5f, Mathf.Infinity), 1, raysLength);
             }
 
             soundBars.Add (clone);
+            soundBarComponents.Add (sb);
+            soundBarChildParticles.Add (childPS);
+            soundBarTransforms.Add (clone.transform);
         }
 
         visualizationsCanBeUpdated = true;
@@ -543,31 +559,32 @@ public class RhythmVisualizatorPro : MonoBehaviour {
     void ChangeColor () {
 
         // UPDATE: Obtenemos el color desde _BaseColor para URP
-        if(soundBars[0].GetComponent<SoundBar>().cube.material.HasProperty("_BaseColor"))
+        if(soundBarComponents[0].cube.material.HasProperty("_BaseColor"))
         {
-            currentColor = soundBars [0].GetComponent<SoundBar> ().cube.material.GetColor("_BaseColor");
+            currentColor = soundBarComponents [0].cube.material.GetColor("_BaseColor");
         }
-        else 
+        else
         {
-            currentColor = soundBars [0].GetComponent<SoundBar> ().cube.material.color;
+            currentColor = soundBarComponents [0].cube.material.color;
         }
 
         actualColor = Color.Lerp (currentColor, colors [posColor], Time.deltaTime / colorLerpTime);
 
-        foreach (GameObject cube in soundBars) {
+        for (int i = 0; i < soundBarComponents.Count; i++) {
+            var sb = soundBarComponents [i];
             var newColor = actualColor;
             newColor.a = raysAlpha;
-            
+
             // UPDATE: Usar _BaseColor y _EmissionColor
-            var rayMat = cube.GetComponent<SoundBar> ().ray.material;
+            var rayMat = sb.ray.material;
             rayMat.SetColor ("_BaseColor", newColor);
             rayMat.SetColor ("_EmissionColor", newColor);
 
-            var cubeMat = cube.GetComponent<SoundBar> ().cube.material;
+            var cubeMat = sb.cube.material;
             cubeMat.SetColor("_BaseColor", actualColor);
             cubeMat.SetColor("_EmissionColor", actualColor);
 
-            var ps = cube.GetComponent<SoundBar> ().pSystem.main;
+            var ps = sb.pSystem.main;
             ps.startColor = actualColor;
 
             var actualParticleSystem = rhythmParticleSystem.main;
@@ -793,20 +810,21 @@ public class RhythmVisualizatorPro : MonoBehaviour {
             if (useGradient) {
                 if (!colorUpdated) {
 
-                    for (int i = 0; i < soundBars.Count; i++) {
+                    for (int i = 0; i < soundBarComponents.Count; i++) {
+                        var sb = soundBarComponents [i];
                         var newColor = gradient.Evaluate (((float)(i + 1) / (float)usedSoundBars));
-                        
+
                         // UPDATE: Usar _BaseColor y _EmissionColor
-                        var cubeMat = soundBars[i].GetComponent<SoundBar> ().cube.material;
+                        var cubeMat = sb.cube.material;
                         cubeMat.SetColor("_BaseColor", newColor);
                         cubeMat.SetColor("_EmissionColor", newColor);
 
-                        var actualParticleSystem = soundBars[i].GetComponent<SoundBar>().pSystem.main;
+                        var actualParticleSystem = sb.pSystem.main;
                         actualParticleSystem.startColor = newColor;
 
                         newColor.a = raysAlpha;
 
-                        var rayMat = soundBars[i].GetComponent<SoundBar> ().ray.material;
+                        var rayMat = sb.ray.material;
                         rayMat.SetColor ("_BaseColor", newColor);
                         rayMat.SetColor ("_EmissionColor", newColor);
 
@@ -833,7 +851,7 @@ public class RhythmVisualizatorPro : MonoBehaviour {
 
             if (mirror) {  // MIRROR MODE
                 spectrumLeftData = AudioListener.GetSpectrumData(channelValue, 0, method);
-                spectrumRightData = AudioListener.GetSpectrumData(channelValue, 0, method);
+                spectrumRightData = spectrumLeftData; // mirror reuses channel 0, skip redundant FFT
             } else { // NORMAL MODE
                 spectrumLeftData = AudioListener.GetSpectrumData(channelValue, 0, method);
                 spectrumRightData = AudioListener.GetSpectrumData(channelValue, 1, method);
@@ -848,7 +866,7 @@ public class RhythmVisualizatorPro : MonoBehaviour {
 
             if (mirror) {  // MIRROR MODE
                 spectrumLeftData = audioSource.GetSpectrumData(channelValue, 0, method);
-                spectrumRightData = audioSource.GetSpectrumData(channelValue, 0, method);
+                spectrumRightData = spectrumLeftData; // mirror reuses channel 0, skip redundant FFT
             }
             else { // NORMAL MODE
                 spectrumLeftData = audioSource.GetSpectrumData(channelValue, 0, method);
@@ -894,24 +912,24 @@ public class RhythmVisualizatorPro : MonoBehaviour {
             // SoundBars for Left Channel and Right Channel
             for (int i = 0; i < halfBarsValue; i++) {
 
-                // Apply Off-Sets to get the AudioSpectrum
-                int spectrumLeft = i * bassHorizontalScale + bassOffset;
-                int spectrumRight = i * trebleHorizontalScale + trebleOffset;
+                // Apply Off-Sets to get the AudioSpectrum (clamped to the spectrum array bounds)
+                int spectrumLeft = Mathf.Min (i * bassHorizontalScale + bassOffset, channelValue - 1);
+                int spectrumRight = Mathf.Min (i * trebleHorizontalScale + trebleOffset, channelValue - 1);
 
                 float spectrumLeftValue = 0;
                 float spectrumRightValue = 0;
 
                 // Get Actual Scale from SoundBar in "i" position (MIRROR MODE)
                 if (mirror) {
-                    prevLeftScale = soundBars[(halfBarsValue - 1 - i)].transform.localScale;
-                    prevRightScale = soundBars[i + halfBarsValue].transform.localScale;
+                    prevLeftScale = soundBarTransforms[(halfBarsValue - 1 - i)].localScale;
+                    prevRightScale = soundBarTransforms[i + halfBarsValue].localScale;
 
                     spectrumLeftValue = spectrumLeftData[spectrumLeft] * bassSensibility;
                     spectrumRightValue = spectrumLeftValue;
                 } else {
                     // Get Actual Scale from SoundBar in "i" position (NORMAL MODE)
-                    prevLeftScale = soundBars [i].transform.localScale;
-                    prevRightScale = soundBars [i + halfBarsValue].transform.localScale;
+                    prevLeftScale = soundBarTransforms [i].localScale;
+                    prevRightScale = soundBarTransforms [i + halfBarsValue].localScale;
 
                     spectrumLeftValue = spectrumLeftData[spectrumLeft] * bassSensibility;
                     spectrumRightValue = spectrumRightData[spectrumRight] * trebleSensibility;
@@ -938,11 +956,11 @@ public class RhythmVisualizatorPro : MonoBehaviour {
                 // Set new scale (MIRROR MODE)
                 if (mirror) {
                     EmitParticle((halfBarsValue - 1 - i), spectrumLeftValue);
-                    soundBars[(halfBarsValue - 1 - i)].transform.localScale = leftScale;
+                    soundBarTransforms[(halfBarsValue - 1 - i)].localScale = leftScale;
                 } else {
                     // Set new scale (NORMAL MODE)
                     EmitParticle(i, spectrumLeftValue);
-                    soundBars[i].transform.localScale = leftScale;
+                    soundBarTransforms[i].localScale = leftScale;
                 }
 
                 // Right Channel //
@@ -970,15 +988,15 @@ public class RhythmVisualizatorPro : MonoBehaviour {
 
                 // Set new scale
                 EmitParticle(i + halfBarsValue, spectrumRightValue);
-                soundBars[i + halfBarsValue].transform.localScale = rightScale;
+                soundBarTransforms[i + halfBarsValue].localScale = rightScale;
 
             }
 
         } else { // Scale All SoundBars by Rhythm
 
             for (int i = 0; i < usedSoundBars; i++) {
-                
-                prevLeftScale = soundBars [i].transform.localScale;
+
+                prevLeftScale = soundBarTransforms [i].localScale;
 
                 // If Minimum Particle Sensibility is exceeded (volume is clamped beetween 0.01 and 1 to avoid 0)
                 if (rhythmSurpassed) {
@@ -991,7 +1009,7 @@ public class RhythmVisualizatorPro : MonoBehaviour {
                     // If the Particles are activated, emit a particle too
                     if (soundBarsParticles) {
                         if (remainingParticlesTime <= 0f) {
-                            soundBars [i].GetComponentInChildren<ParticleSystem> ().Play ();
+                            soundBarChildParticles [i].Play ();
 
                             surpassed = true;
                         }
@@ -1013,8 +1031,8 @@ public class RhythmVisualizatorPro : MonoBehaviour {
                 }
 
                 // Set new scale
-                soundBars [i].transform.localScale = rightScale;
-            
+                soundBarTransforms [i].localScale = rightScale;
+
             }
             
 
@@ -1051,7 +1069,7 @@ public class RhythmVisualizatorPro : MonoBehaviour {
             if (spectrumValue >= minParticleSensibility) {
                 if (remainingParticlesTime <= 0f) {
 
-                    soundBars [index].GetComponentInChildren<ParticleSystem> ().Emit (1);
+                    soundBarChildParticles [index].Emit (1);
 
                     surpassed = true;
                 }
